@@ -1,0 +1,5 @@
+Presentation for Emacs and C/C++ development for the Berlin [[http://emacs-berlin.org/][emacs-meetup]] in Berlin 25/03/2015.
+
+Created using [[https://github.com/yjwen/org-reveal][org-reveal]]
+
+Repurposed from an older presentation of mine.

@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Emacs and C/C++ code navigation</title>
+<meta name="author" content="(Eleftherios  Karapetsas)"/>
+
+<link rel="stylesheet" href="file:///home/lefteris/w/reveal.js/css/reveal.css"/>
+<link rel="stylesheet" href="file:///home/lefteris/w/reveal.js/css/theme/moon.css" id="theme"/>
+<link rel="stylesheet" href="./style.css"/>
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'file:///home/lefteris/w/reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide">
+<h1>Emacs and C/C++ code navigation</h1><h2 class="my-title">Eleftherios  Karapetsas</h2><h3 class="my-title"><a href="mailto:lefteris@refu.co">lefteris@refu.co</a></h3>
+</section>
+
+
+
+<section>
+<section id="sec-1">
+
+<h2 >Goal of this presentation</h2>
+<ul class="fragment roll-in">
+<li>Explore ways to develop in C/C++ with Emacs other than CEDET.</li>
+<li>Show some modern C/C++ Emacs packages</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-2">
+
+<h2 >Setup the environment</h2>
+<p>
+We will use el-get to obtain packages.
+</p>
+
+<ul >
+<li>Obtain el-get</li>
+<li>Specify the required packages</li>
+<li>Setup the packages</li>
+<li>Develop !</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-3">
+
+<h2 >el-get</h2>
+<p>
+Installs, updates and initializes Emacs packages for you.
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-emacs-lisp">(add-to-list 'load-path <span style="color: #2aa198;">"~/.emacs.d/el-get/el-get"</span>)
+
+(<span style="color: #859900; font-weight: bold;">unless</span> (<span style="color: #859900; font-weight: bold;">require</span> '<span style="color: #268bd2; font-weight: bold;">el-get</span> nil 'noerror)
+  (<span style="color: #859900; font-weight: bold;">with-current-buffer</span>
+      (url-retrieve-synchronously
+       <span style="color: #2aa198;">"https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el"</span>)
+    (goto-char (point-max))
+    (eval-print-last-sexp)))
+
+(add-to-list 'el-get-recipe-path <span style="color: #2aa198;">"~/.emacs.d/el-get-user/recipes"</span>)
+(el-get 'sync)
+</pre>
+</div>
+</section>
+<section id="sec-3-1">
+
+<h3 >Obtaining new packages</h3>
+<ul >
+<li><p>
+Downloading a new package
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-sh">M-x el-get-install RET name-of-package
+</pre>
+</div></li>
+
+<li><p>
+Updating an already installed package
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-sh">M-x el-get-update RET name-of-package
+</pre>
+</div></li>
+
+<li><p>
+Deleting an installed package
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-sh">M-x el-get-remove RET name-of-package
+</pre>
+</div></li>
+
+<li><p>
+Update all installed packages
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-sh">M-x el-get-update-all
+</pre>
+</div></li>
+
+</ul>
+</section>
+<section id="sec-3-2">
+
+<h3 >Specifying your packages</h3>
+<div class="org-src-container">
+
+<pre  class="src src-emacs-lisp">(<span style="color: #859900; font-weight: bold;">defvar</span> <span style="color: #268bd2;">my-packages</span>
+'(s
+  ag
+  fill-column-indicator
+  expand-region))
+
+(el-get 'sync my-packages)
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-4">
+
+<h2 >Packages for C++ development</h2>
+<ul >
+<li>Must have
+<ul >
+<li>malinka</li>
+<li>rtags</li>
+<li>auto-complete</li>
+<li>flycheck</li>
+<li>projectile</li>
+
+</ul></li>
+<li>Optional
+<ul >
+<li>magit</li>
+<li>helm</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="sec-4-1">
+
+<h3 >Actually getting the packages</h3>
+<div class="org-src-container">
+
+<pre  class="src src-emacs-lisp">(<span style="color: #859900; font-weight: bold;">defvar</span> <span style="color: #268bd2;">my-packages</span>
+'(malinka
+  rtags
+  auto-complete
+  flycheck
+  projectile
+  magit
+  helm))
+
+(el-get 'sync my-packages)
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-5">
+
+<h2 >Malinka</h2>
+<p>
+A meta-package allowing users to configure C++ projects and feed their data to other packages.
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-emacs-lisp">(malinka-define-project
+ <span style="color: #839496; font-weight: bold;">:name</span> <span style="color: #2aa198;">"ethereum"</span>
+ <span style="color: #839496; font-weight: bold;">:same-name-check</span> nil
+ <span style="color: #839496; font-weight: bold;">:build-cmd</span> <span style="color: #2aa198;">"make clean &amp;&amp; make -j5 VERBOSE=1"</span>
+ <span style="color: #839496; font-weight: bold;">:build-root-directory</span> <span style="color: #2aa198;">"/home/lefteris/ew/cpp-ethereum/build"</span>
+ <span style="color: #839496; font-weight: bold;">:root-directory</span> <span style="color: #2aa198;">"/home/lefteris/ew/cpp-ethereum"</span>
+ <span style="color: #839496; font-weight: bold;">:compile-cmd</span> <span style="color: #2aa198;">"make -C .. -j4"</span>
+ <span style="color: #839496; font-weight: bold;">:test-cmd</span> <span style="color: #2aa198;">"./build/test/testeth"</span>)
+</pre>
+</div>
+
+<div class="source-reference">
+<p>
+Source: <a href="https://github.com/LefterisJP/malinka">https://github.com/LefterisJP/malinka</a>
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-6">
+
+<h2 >Rtags</h2>
+<p>
+Client server application that indexes C/C++ code and keeps a peristent in-memory Database of all references. Uses Clang.
+Provides:
+</p>
+<ul >
+<li>Jumping between tags and definitions/implementations especially in C++.</li>
+<li>Reference finding</li>
+<li>Auto completion (feeding data to the auto complete package)</li>
+<li>Clang fix-it hints</li>
+<li>Renaming symbols across projects</li>
+
+</ul>
+
+<div class="source-reference">
+<p>
+Source: <a href="https://github.com/Andersbakken/rtags">https://github.com/Andersbakken/rtags</a>
+</p>
+</div>
+</section>
+<section id="sec-6-1">
+
+<h3 >Reference finding</h3>
+
+<div class="figure">
+<p><img src="./rtags_ref_find1.png" alt="rtags_ref_find1.png" align="left" />
+</p>
+</div>
+
+<div class="figure">
+<p><img src="./rtags_ref_find2.png" alt="rtags_ref_find2.png" align="right" />
+</p>
+</div>
+</section>
+<section id="sec-6-2">
+
+<h3 >Auto completion</h3>
+<p>
+Simple example for BOOST's asio basic resolver.
+</p>
+
+<div class="figure">
+<p><img src="./autocomplete1.png" alt="autocomplete1.png" align="left" width="50%" height="60%" />
+</p>
+</div>
+
+<div class="figure">
+<p><img src="./autocomplete2.png" alt="autocomplete2.png" align="right" width="50%" height="80%" />
+</p>
+</div>
+</section>
+<section id="sec-6-3">
+
+<h3 >Clang Fixits</h3>
+
+<div class="figure">
+<p><img src="./fixit1.png" alt="fixit1.png" />
+</p>
+</div>
+</section>
+<section id="sec-6-4">
+
+<h3 >Clang Fixits</h3>
+
+<div class="figure">
+<p><img src="./fixit2.png" alt="fixit2.png" />
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-7">
+
+<h2 >Flycheck</h2>
+<p>
+A way to interface to various syntax checkers. For C/C++ the clang syntax checker is recommended.
+<img src="./flycheck.png" alt="flycheck.png" />
+</p>
+
+
+<div class="source-reference">
+<p>
+Source: <a href="https://github.com/flycheck/flycheck">https://github.com/flycheck/flycheck</a>
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-8">
+
+<h2 >Projectile</h2>
+<p>
+A project management package. Uses version control to easily index all project files.
+</p>
+
+<div class="figure">
+<p><img src="./projectile1.png" alt="projectile1.png" align="right" />
+</p>
+</div>
+<ul >
+<li>Switch between headers/sources</li>
+
+</ul>
+<ul class="fragment roll-in">
+<li>Compile a project</li>
+<li>Test a project</li>
+<li>Grep in a project</li>
+<li>Much more &#x2026;</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-9" data-background="/home/lefteris/ew/devcon1_presentation/bg1.jpg">
+
+<h2 >Thank you</h2>
+<ul >
+<li>Any questions?</li>
+<li>Any other cool tips by EMACS users?</li>
+
+</ul>
+<div class="closing_paragraph">
+<ul >
+<li>Get the slides from: <a href="https://github.com/LefterisJP/ethdevcon0_emacs.git">https://github.com/LefterisJP/ethdevcon0_emacs.git</a></li>
+<li>Follow me @LefterisJP for more updates.</li>
+
+</ul>
+</div>
+</section>
+</section>
+</div>
+</div>
+
+<script src="file:///home/lefteris/w/reveal.js/lib/js/head.min.js"></script>
+<script src="file:///home/lefteris/w/reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: false,
+history: true,
+center: false,
+slideNumber: true,
+rollingLinks: true,
+keyboard: true,
+overview: true,
+margin: 0.00,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'file:///home/lefteris/w/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'file:///home/lefteris/w/reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'file:///home/lefteris/w/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'file:///home/lefteris/w/reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+ { src: 'file:///home/lefteris/w/reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'file:///home/lefteris/w/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+]
+});
+</script>
+</body>
+</html>

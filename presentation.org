@@ -1,0 +1,166 @@
+#+Title: Emacs and C/C++ code navigation
+#+Author: Eleftherios  Karapetsas
+#+Email: lefteris@refu.co
+#+REVEAL_MARGIN: 0.0001
+#+REVEAL_EXTRA_CSS: ./style.css
+#+REVEAL_HLEVEL: 1
+#+REVEAL_TITLE_SLIDE_TEMPLATE: <h1>%t</h1><h2 class="my-title">%a</h2><h3 class="my-title">%e</h3>
+#+OPTIONS: toc:nil
+#+OPTIONS: reveal_control:t
+#+OPTIONS: reveal_progress:nil
+#+OPTIONS: reveal_history:ni1l
+#+OPTIONS: reveal_center:nil
+#+OPTIONS: reveal_rolling_links:nil
+#+OPTIONS: reveal_keyboard:t
+#+OPTIONS: reveal_rolling_links:t
+#+OPTIONS: reveal_overview:t
+
+
+
+* Goal of this presentation
+#+ATTR_REVEAL: :frag roll-in
+- Explore ways to develop in C/C++ with Emacs other than CEDET.
+- Show some modern C/C++ Emacs packages
+* Setup the environment
+We will use el-get to obtain packages.
+
+- Obtain el-get
+- Specify the required packages
+- Setup the packages
+- Develop !
+* el-get
+Installs, updates and initializes Emacs packages for you.
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+
+(unless (require 'el-get nil 'noerror)
+  (with-current-buffer
+      (url-retrieve-synchronously
+       "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el")
+    (goto-char (point-max))
+    (eval-print-last-sexp)))
+
+(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
+(el-get 'sync)
+#+END_SRC
+** Obtaining new packages
+- Downloading a new package
+ #+BEGIN_SRC sh
+ M-x el-get-install RET name-of-package
+ #+END_SRC
+
+- Updating an already installed package
+ #+BEGIN_SRC sh
+ M-x el-get-update RET name-of-package
+ #+END_SRC
+
+- Deleting an installed package
+ #+BEGIN_SRC sh
+ M-x el-get-remove RET name-of-package
+ #+END_SRC
+
+- Update all installed packages
+ #+BEGIN_SRC sh
+ M-x el-get-update-all
+ #+END_SRC
+** Specifying your packages
+#+BEGIN_SRC emacs-lisp
+(defvar my-packages
+'(s
+  ag
+  fill-column-indicator
+  expand-region))
+
+(el-get 'sync my-packages)
+#+END_SRC
+* Packages for C++ development
+- Must have
+    - malinka
+    - rtags
+    - auto-complete
+    - flycheck
+    - projectile
+- Optional
+    - magit
+    - helm
+** Actually getting the packages
+#+BEGIN_SRC emacs-lisp
+(defvar my-packages
+'(malinka
+  rtags
+  auto-complete
+  flycheck
+  projectile
+  magit
+  helm))
+
+(el-get 'sync my-packages)
+#+END_SRC
+* Malinka
+A meta-package allowing users to configure C++ projects and feed their data to other packages.
+#+BEGIN_SRC emacs-lisp
+(malinka-define-project
+ :name "ethereum"
+ :same-name-check nil
+ :build-cmd "make clean && make -j5 VERBOSE=1"
+ :build-root-directory "/home/lefteris/ew/cpp-ethereum/build"
+ :root-directory "/home/lefteris/ew/cpp-ethereum"
+ :compile-cmd "make -C .. -j4"
+ :test-cmd "./build/test/testeth")
+#+END_SRC
+
+#+REVEAL_HTML: <div class="source-reference">
+Source: https://github.com/LefterisJP/malinka
+#+REVEAL_HTML: </div>
+* Rtags
+Client server application that indexes C/C++ code and keeps a peristent in-memory Database of all references. Uses Clang.
+Provides:
+- Jumping between tags and definitions/implementations especially in C++.
+- Reference finding
+- Auto completion (feeding data to the auto complete package)
+- Clang fix-it hints
+- Renaming symbols across projects
+
+#+REVEAL_HTML: <div class="source-reference">
+Source: https://github.com/Andersbakken/rtags
+#+REVEAL_HTML: </div>
+** Reference finding
+#+ATTR_HTML: :align left 
+[[./rtags_ref_find1.png]]
+#+ATTR_HTML: :align right 
+[[./rtags_ref_find2.png]]
+** Auto completion
+Simple example for BOOST's asio basic resolver.
+#+ATTR_HTML: :align left :width 50% :height 60%
+[[./autocomplete1.png]]
+#+ATTR_HTML: :align right :width 50% :height 80%
+[[./autocomplete2.png]]
+** Clang Fixits
+[[./fixit1.png]]
+** Clang Fixits
+[[./fixit2.png]]
+* Flycheck
+A way to interface to various syntax checkers. For C/C++ the clang syntax checker is recommended.
+[[./flycheck.png]]
+
+
+#+REVEAL_HTML: <div class="source-reference">
+Source: https://github.com/flycheck/flycheck
+#+REVEAL_HTML: </div>
+* Projectile
+A project management package. Uses version control to easily index all project files.
+#+ATTR_HTML: :align right
+[[./projectile1.png]]
+- Switch between headers/sources
+#+ATTR_REVEAL: :frag roll-in
+- Compile a project
+- Test a project
+- Grep in a project
+- Much more ...
+* Thank you
+- Any questions?
+- Any other cool tips by EMACS users?
+#+REVEAL_HTML: <div class="closing_paragraph">
+- Get the slides from: [[https://github.com/LefterisJP/emacs_berlin_25_03_15.git]]
+- Follow me @LefterisJP for more updates.
+#+REVEAL_HTML: </div>
